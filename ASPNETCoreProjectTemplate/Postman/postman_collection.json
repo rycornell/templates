@@ -1,0 +1,216 @@
+{
+	"info": {
+		"_postman_id": "",
+		"name": "ASPNETCoreProjectTemplate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [		
+		{
+			"name": "New API GET",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "",
+						"exec": [
+							"var jsonData = pm.response.text();",
+							"",
+							"pm.environment.set(\"new_api_response\", jsonData);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{new_api_base_url}}{{path}}?{{params}}",
+					"host": [
+						"{{new_api_base_url}}{{path}}"
+					],
+					"query": [
+						{
+							"key": "{{params}}",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Old API GET",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "",
+						"exec": [
+							"var jsonData = pm.response.text();",
+							"",
+							"pm.environment.set(\"old_api_response\", jsonData);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+				],
+				"url": {
+					"raw": "{{old_api_base_url}}{{path}}?{{params}}",
+					"host": [
+						"{{old_api_base_url}}{{path}}"
+					],
+					"query": [
+						{
+							"key": "{{params}}",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "API Response Comparison Test",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "",
+						"exec": [
+							"pm.test(\"New API and Old API return same response data\", function () {",
+							"  var oldResponse = pm.environment.get(\"old_api_response\");",
+							"  var newResponse = pm.environment.get(\"new_api_response\");",
+							"  pm.expect(!newResponse).to.be.false;",
+							"  pm.expect(oldResponse).to.equal(newResponse);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://www.postman-echo.com",
+					"protocol": "https",
+					"host": [
+						"www",
+						"postman-echo",
+						"com"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "dd6ef391-f029-4863-852d-2bd2eb707169",
+				"type": "text/javascript",
+				"exec": [
+					"if (!pm.environment.get(\"access_token\"))",
+					"{",
+					"    console.log(\"logging in...\");",
+					"    ",
+					"    const echoPostRequest = {",
+					"        url: pm.environment.get(\"login_base_url\") + \"/token\",",
+					"        method: 'POST',",
+					"        header: {",
+					"            'Content-Type': 'application/x-www-form-urlencoded'",
+					"        },",
+					"        body: {",
+					"            mode: 'urlencoded',",
+					"            urlencoded: [",
+					"                {key: \"grant_type\", value: \"password\", disabled: false},",
+					"                {key: \"username\", value: pm.environment.get(\"username\"), disabled: false},",
+					"                {key: \"password\", value: pm.environment.get(\"password\"), disabled: false},",
+					"                {key: \"client_id\", value: 'ASPNETCoreProjectTemplate', disabled: false}",
+					"            ]",
+					"        }",
+					"    };",
+					"",
+					"    pm.sendRequest(echoPostRequest, function (err, response) {",
+					"        var jsonData = response.json();",
+					"        var access_token = jsonData.access_token;",
+					"        var refresh_token = jsonData.refresh_token;",
+					"        ",
+					"        pm.environment.set(\"access_token\", access_token);",
+					"        pm.environment.set(\"refresh_token\", refresh_token);",
+					"    });",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "",
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Status code is 200\", function () {",
+					"    pm.response.to.have.status(200);",
+					"});"
+				]
+			}
+		}
+	]
+}
